@@ -13,17 +13,28 @@ public class Network {
     public double predict(double x1, double x2) {
 
         // Pass inputs into hidden neurons
-        double firstOut = first.predict(x1, x2);
-        double secondOut = second.predict(x1, x2);
+        double firstOut = first.predict(x1/300000, x2/2000);
+        double secondOut = second.predict(x1/300000, x2/2000);
 
         // Hidden outputs become inputs to final neuron
         return out.predict(firstOut, secondOut);
     }
 
     public static void main(String [] args){
-        Network network = new Network();
-        Double prediction = network.predict(2.2, 30.5);
-        System.out.println("prediction: " + prediction);
+        List<List<String>> states = readCSV("/workspaces/Neural-Networks/StatesStats.csv");
+        //read in all the passwords and parse out the two inputs into their own arrayList of double[]
+        //area and admission year contribute to population of a state
+        ArrayList<double[]> data = new ArrayList<>();
+        ArrayList<Double> answers = new ArrayList<>();
+        for (int i = 1; i < states.size(); i ++){
+            data.add(new double [] {Double.parseDouble(states.get(i).get(5))/300000, Double.parseDouble(states.get(i).get(3))/2000});
+            answers.add(Double.parseDouble(states.get(i).get(4))/50000000);
+        }
+        Network n = new Network();
+        n.train(data, answers);
+        n.predict(50000, 1900); // example prediction for a state with area 50,000 and admission year 1900
+        System.out.println("Prediction for area 50,000 and admission year 1900 is a population of " + 50000000 * n.predict(50000, 1900));
+
     }
 
     /**
@@ -122,8 +133,8 @@ public class Network {
     }
 
     /**
-     * Reads CSV file into a 2D list of strings
-     */
+    * Reads CSV file into a 2D list of strings
+    */
     public static List<List<String>> readCSV(String filePath) {
         List<List<String>> data = new ArrayList<>();
 
